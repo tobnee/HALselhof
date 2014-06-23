@@ -72,5 +72,58 @@ class TestHalConstruction extends FunSuite with Matchers {
                   }""".stripMargin))
   }
 
+  test("a HAL resource may embed multible resources") {
+    val baseResource =
+      Json.obj("currentlyProcessing" -> 14, "shippedToday" -> 20).asResource ++
+       HalLink("self", "/orders") ++
+       HalLink("next", "/orders?page=2") ++
+       HalLink("find", "/orders{?id}", templated = true)
+
+    val resource1 =
+      TestData(30, "USD", "shipped").asResource ++
+       HalLink("self", "/orders/123") ++
+       HalLink("basket", "/baskets/98712") ++
+       HalLink("customer", "/customers/7809")
+
+    val resource2 =
+      TestData(20, "USD", "processing").asResource ++
+       HalLink("self", "/orders/124") ++
+       HalLink("basket", "/baskets/97213") ++
+       HalLink("customer", "/customers/12369")
+
+    val res = baseResource ++ Hal.embedded("orders", resource1, resource2)
+
+    res.json should equal(Json.parse("""{
+      "_links": {
+        "self": { "href": "/orders" },
+        "next": { "href": "/orders?page=2" },
+        "find": { "href": "/orders{?id}", "templated": true }
+      },
+      "_embedded": {
+        "orders": [{
+            "_links": {
+              "self": { "href": "/orders/123" },
+              "basket": { "href": "/baskets/98712" },
+              "customer": { "href": "/customers/7809" }
+            },
+            "total": 30,
+            "currency": "USD",
+            "status": "shipped"
+          },{
+            "_links": {
+              "self": { "href": "/orders/124" },
+              "basket": { "href": "/baskets/97213" },
+              "customer": { "href": "/customers/12369" }
+            },
+            "total": 20,
+            "currency": "USD",
+            "status": "processing"
+        }]
+      },
+      "currentlyProcessing": 14,
+      "shippedToday": 20
+      }""".stripMargin))
+  }
+
 
 }
