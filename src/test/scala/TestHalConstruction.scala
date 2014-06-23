@@ -14,11 +14,10 @@ class TestHalConstruction extends FunSuite  with Matchers {
   }
 
   test("A HAL resource may contain only links") {
-    Json.toJson(
-      Hal.links(
+    (Hal.links(
         HalLink("self", "/orders"),
         HalLink("next", "/orders?page=2"),
-        HalLink("find", "/orders{?id}", templated = true))) should equal(
+        HalLink("find", "/orders{?id}", templated = true))).json should equal(
           Json.parse("""{
                        "_links": {
                        "self": { "href": "/orders" },
@@ -29,8 +28,8 @@ class TestHalConstruction extends FunSuite  with Matchers {
   }
 
   test("A HAL resouce may contain links and state") {
-    val json = TestData(20, "EUR", "shipped")
-    (Hal.state(json) ++
+    val data = TestData(20, "EUR", "shipped")
+    (data.asResource ++
       Hal.links(
         HalLink("self", "/orders"),
         HalLink("next", "/orders?page=2"),
