@@ -4,12 +4,12 @@ import play.api.libs.json._
 
 package object hal {
 
-  case class HalDocument(links: HalLinks, document: JsObject, embedded: Vector[(String, Vector[HalDocument])] = Vector.empty) {
-    def ++(other: HalDocument): HalDocument = {
-      val d = document ++ other.document
+  case class HalResource(links: HalLinks, state: JsObject, embedded: Vector[(String, Vector[HalResource])] = Vector.empty) {
+    def ++(other: HalResource): HalResource = {
+      val d = state ++ other.state
       val l = links ++ other.links
       val e = embedded ++ other.embedded
-      HalDocument(l, d, e)
+      HalResource(l, d, e)
     }
   }
 
@@ -36,8 +36,8 @@ package object hal {
     }
   }
 
-  implicit val halDocumentWrites: Writes[HalDocument] = new Writes[HalDocument] {
-    def writes(hal: HalDocument): JsValue = {
+  implicit val halResourceWrites: Writes[HalResource] = new Writes[HalResource] {
+    def writes(hal: HalResource): JsValue = {
 
       val embedded = hal.embedded match {
         case Vector((k, Vector(elem))) => Json.obj((k, Json.toJson(elem)))
@@ -48,10 +48,10 @@ package object hal {
         })
       }
 
-      val document = if (hal.links.links.isEmpty) hal.document
-      else Json.toJson(hal.links).as[JsObject] ++ hal.document
-      if (hal.embedded.isEmpty) document
-      else document + ("_embedded" -> embedded)
+      val resource = if (hal.links.links.isEmpty) hal.state
+      else Json.toJson(hal.links).as[JsObject] ++ hal.state
+      if (hal.embedded.isEmpty) resource
+      else resource + ("_embedded" -> embedded)
     }
   }
 }

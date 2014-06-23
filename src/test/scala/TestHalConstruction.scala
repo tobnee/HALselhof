@@ -3,17 +3,17 @@ import play.api.libs.json.Json
 import play.api.hal._
 import play.api.hal.Hal._
 
-class TestBase extends FunSuite  with Matchers {
+class TestHalConstruction extends FunSuite  with Matchers {
 
   case class TestData(total: Int, currency: String, status: String)
   implicit val testWrites = Json.writes[TestData]
 
-  test("A mininmal HAL document is a normal JSON") {
+  test("A mininmal HAL resource is a JSON object") {
     val data = TestData(20, "EUR", "shipped")
     data.asResource.json should equal(Json.toJson(data))
   }
 
-  test("A HAL document may contain only links") {
+  test("A HAL resource may contain only links") {
     Json.toJson(
       Hal.links(
         HalLink("self", "/orders"),
@@ -28,7 +28,7 @@ class TestBase extends FunSuite  with Matchers {
                         }""".stripMargin))
   }
 
-  test("A HAL document may contain links and state") {
+  test("A HAL resouce may contain links and state") {
     val json = TestData(20, "EUR", "shipped")
     (Hal.state(json) ++
       Hal.links(
@@ -47,7 +47,7 @@ class TestBase extends FunSuite  with Matchers {
                         }""".stripMargin))
   }
 
-  test("a HAL document may embed links") {
+  test("a HAL resource may embed links") {
     val json = TestData(20, "EUR", "shipped")
     Json.toJson(Hal.state(json))
     val selfLink = HalLink("self", "/blog-post").asResource
