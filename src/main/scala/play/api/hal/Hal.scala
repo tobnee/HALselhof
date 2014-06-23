@@ -20,10 +20,10 @@ object Hal {
     HalDocument(HalLinks.empty, JsObject(Nil), Vector(name -> embeds.toVector))
   }
 
-  def embedded(embedded: (String, Vector[HalDocument])*): HalDocument = {
-    HalDocument(HalLinks.empty, JsObject(Nil), embedded.toVector)
+  def embeddedLink(link: HalLink, embed: HalDocument): HalDocument = {
+    links(link) ++ embedded(link.name, embed ++ links(link.copy(name = "self")))
   }
-
+  
   def hal[T](content: T, links: Vector[HalLink], embedded: Vector[(String, Vector[HalDocument])] = Vector.empty
               )(implicit cw: Writes[T]): HalDocument = {
     HalDocument(

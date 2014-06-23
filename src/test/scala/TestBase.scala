@@ -51,25 +51,26 @@ class TestBase extends FunSuite  with Matchers {
   test("a HAL document may embed links") {
     val json = TestJson(20, "EUR", "shipped")
     Json.toJson(Hal.state(json))
-    Json.toJson(
-      Hal.links(HalLink("self", "/blog-post"), HalLink("author", "/people/alan-watts")) ++
-        Hal.embedded("author", Hal.links(HalLink("self", "/people/alan-watts")) ++ Hal.state(
-            Json.obj("name" -> "Alan Watts",
-                     "born" -> "January 6, 1915",
-                     "died" ->"November 16, 1973")))
-        ) should equal(
+    val selfLink = Hal.links(HalLink("self", "/blog-post"))
+    val authorLink = HalLink("author", "/people/alan-watts")
+    val embeddedAuthorState = Hal.state(Json.obj(
+      "name" -> "Alan Watts",
+      "born" -> "January 6, 1915",
+      "died" -> "November 16, 1973"))
+
+    Json.toJson(selfLink ++ Hal.embeddedLink(authorLink, embeddedAuthorState)) should equal(
       Json.parse("""{
                  "_links": {
                    "self": { "href": "/blog-post" },
                    "author": { "href": "/people/alan-watts" }
                  },
                  "_embedded": {
-                   "author": [{
+                   "author": {
                      "_links": { "self": { "href": "/people/alan-watts" } },
                      "name": "Alan Watts",
                      "born": "January 6, 1915",
                      "died": "November 16, 1973"
-                   }]
+                   }
                  }
                   }""".stripMargin))
   }
