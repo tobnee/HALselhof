@@ -11,6 +11,10 @@ package object hal {
       val e = embedded ++ other.embedded
       HalResource(l, d, e)
     }
+
+    def ++(link: HalLink): HalResource = {
+      this.copy(links = links ++ link)
+    }
   }
 
   case class HalLink(name: String, href: String, templated: Boolean = false)
@@ -23,6 +27,8 @@ package object hal {
     def ++(other: HalLinks) = {
       HalLinks(links ++ other.links)
     }
+
+    def ++(link: HalLink) = HalLinks(link +: this.links)
   }
 
   implicit val halLinkWrites = new Writes[HalLinks] {

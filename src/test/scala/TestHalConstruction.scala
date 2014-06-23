@@ -3,7 +3,7 @@ import play.api.libs.json.Json
 import play.api.hal._
 import play.api.hal.Hal._
 
-class TestHalConstruction extends FunSuite  with Matchers {
+class TestHalConstruction extends FunSuite with Matchers {
 
   case class TestData(total: Int, currency: String, status: String)
   implicit val testWrites = Json.writes[TestData]
@@ -30,10 +30,9 @@ class TestHalConstruction extends FunSuite  with Matchers {
   test("A HAL resouce may contain links and state") {
     val data = TestData(20, "EUR", "shipped")
     (data.asResource ++
-      Hal.links(
-        HalLink("self", "/orders"),
-        HalLink("next", "/orders?page=2"),
-        HalLink("find", "/orders{?id}", templated = true))).json should equal(
+        HalLink("self", "/orders") ++
+        HalLink("next", "/orders?page=2") ++
+        HalLink("find", "/orders{?id}", templated = true)).json should equal(
       Json.parse("""{
                        "_links": {
                        "self": { "href": "/orders" },
