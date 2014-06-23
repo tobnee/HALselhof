@@ -1,6 +1,6 @@
 package play.api.hal
 
-import play.api.libs.json.{Json, Writes, JsObject}
+import play.api.libs.json.{JsValue, Json, Writes, JsObject}
 
 object Hal {
 
@@ -32,11 +32,15 @@ object Hal {
       embedded)
   }
 
-  implicit class HalLinkToDocument(val link: HalLink) extends AnyVal {
+  implicit class HalLinkToResource(val link: HalLink) extends AnyVal {
     def asResource = Hal.links(link)
   }
 
-  implicit class HalStateToDocument[T : Writes](val link: T) {
+  implicit class JsonToResource(val jsValue: JsValue) extends AnyVal {
+    def asResource = Hal.state(jsValue)
+  }
+
+  implicit class HalStateToResource[T : Writes](val link: T) {
     def asResource = Hal.state(link)
   }
 

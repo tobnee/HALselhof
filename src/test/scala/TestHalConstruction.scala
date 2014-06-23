@@ -52,10 +52,10 @@ class TestHalConstruction extends FunSuite  with Matchers {
     Json.toJson(Hal.state(json))
     val selfLink = HalLink("self", "/blog-post").asResource
     val authorLink = HalLink("author", "/people/alan-watts")
-    val embeddedAuthorState = Hal.state(Json.obj(
+    val embeddedAuthorState = Json.obj(
       "name" -> "Alan Watts",
       "born" -> "January 6, 1915",
-      "died" -> "November 16, 1973"))
+      "died" -> "November 16, 1973").asResource
 
     (selfLink ++ Hal.embeddedLink(authorLink, embeddedAuthorState)).json should equal(
       Json.parse("""{
