@@ -32,4 +32,16 @@ object Hal {
       embedded)
   }
 
+  implicit class HalLinkToDocument(val link: HalLink) extends AnyVal {
+    def asResource = Hal.links(link)
+  }
+
+  implicit class HalStateToDocument[T : Writes](val link: T) {
+    def asResource = Hal.state(link)
+  }
+
+  implicit class HalResourceToJson(val hal: HalDocument) extends AnyVal {
+    def json = Json.toJson(hal)
+  }
+
 }

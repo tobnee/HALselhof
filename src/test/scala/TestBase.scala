@@ -1,15 +1,16 @@
 import org.scalatest.{Matchers, FunSuite}
 import play.api.libs.json.Json
 import play.api.hal._
+import play.api.hal.Hal._
 
 class TestBase extends FunSuite  with Matchers {
 
-  case class TestJson(total: Int, currency: String, status: String)
-  implicit val testWrites = Json.writes[TestJson]
+  case class TestData(total: Int, currency: String, status: String)
+  implicit val testWrites = Json.writes[TestData]
 
   test("A mininmal HAL document is a normal JSON") {
-    val json = TestJson(20, "EUR", "shipped")
-    Json.toJson(Hal.state(json)) should equal(Json.toJson(json))
+    val data = TestData(20, "EUR", "shipped")
+    data.asResource.json should equal(Json.toJson(data))
   }
 
   test("A HAL document may contain only links") {
@@ -28,14 +29,12 @@ class TestBase extends FunSuite  with Matchers {
   }
 
   test("A HAL document may contain links and state") {
-    val json = TestJson(20, "EUR", "shipped")
-    Json.toJson(Hal.state(json))
-    Json.toJson(
-      Hal.state(json) ++
+    val json = TestData(20, "EUR", "shipped")
+    (Hal.state(json) ++
       Hal.links(
         HalLink("self", "/orders"),
         HalLink("next", "/orders?page=2"),
-        HalLink("find", "/orders{?id}", templated = true))) should equal(
+        HalLink("find", "/orders{?id}", templated = true))).json should equal(
       Json.parse("""{
                        "_links": {
                        "self": { "href": "/orders" },
@@ -49,16 +48,16 @@ class TestBase extends FunSuite  with Matchers {
   }
 
   test("a HAL document may embed links") {
-    val json = TestJson(20, "EUR", "shipped")
+    val json = TestData(20, "EUR", "shipped")
     Json.toJson(Hal.state(json))
-    val selfLink = Hal.links(HalLink("self", "/blog-post"))
+    val selfLink = HalLink("self", "/blog-post").asResource
     val authorLink = HalLink("author", "/people/alan-watts")
     val embeddedAuthorState = Hal.state(Json.obj(
       "name" -> "Alan Watts",
       "born" -> "January 6, 1915",
       "died" -> "November 16, 1973"))
 
-    Json.toJson(selfLink ++ Hal.embeddedLink(authorLink, embeddedAuthorState)) should equal(
+    (selfLink ++ Hal.embeddedLink(authorLink, embeddedAuthorState)).json should equal(
       Json.parse("""{
                  "_links": {
                    "self": { "href": "/blog-post" },
