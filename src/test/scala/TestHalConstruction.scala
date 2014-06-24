@@ -125,5 +125,19 @@ class TestHalConstruction extends FunSuite with Matchers {
       }""".stripMargin))
   }
 
+  test("provide alternative names for composition") {
+    val data = TestData(20, "EUR", "shipped")
+    data.asResource ++
+      HalLink("self", "/orders") ++
+      HalLink("next", "/orders?page=2") ++
+      HalLink("find", "/orders{?id}", templated = true) should equal(
+
+      data.asResource include
+        HalLink("self", "/orders") include
+        HalLink("next", "/orders?page=2") include
+        HalLink("find", "/orders{?id}", templated = true)
+    )
+  }
+
 
 }
