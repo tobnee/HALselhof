@@ -139,5 +139,20 @@ class TestHalConstruction extends FunSuite with Matchers {
     )
   }
 
+  test("provide support for optional link attributes") {
+    Hal.links(
+      HalLink("self", "/orders").withDeprecation("http://www.thisisdeprecated.com"),
+      HalLink("next", "/orders?page=2").withType("application/json"),
+      HalLink("find", "/orders{?id}", templated = true).withHreflang("de")).json should equal(
+
+      Json.parse("""{
+        "_links": {
+               "self": { "href": "/orders", "deprecation": "http://www.thisisdeprecated.com" },
+               "next": { "href": "/orders?page=2", "type": "application/json" },
+               "find": { "href": "/orders{?id}", "templated": true, "hreflang": "de" }
+             }
+        }""".stripMargin)
+    )
+  }
 
 }

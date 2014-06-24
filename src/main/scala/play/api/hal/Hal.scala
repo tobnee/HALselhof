@@ -21,7 +21,7 @@ object Hal {
   }
 
   def embeddedLink(link: HalLink, embed: HalResource): HalResource = {
-    links(link) ++ embedded(link.name, embed ++ links(link.copy(name = "self")))
+    links(link) ++ embedded(link.rel, embed ++ links(link.copy(rel = "self")))
   }
   
   def hal[T](content: T, links: Vector[HalLink], embedded: Vector[(String, Vector[HalResource])] = Vector.empty

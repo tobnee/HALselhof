@@ -21,7 +21,18 @@ package object hal {
     def include(link: HalLink) = ++(link)
   }
 
-  case class HalLink(name: String, href: String, templated: Boolean = false)
+  case class HalLink(rel: String, href: String,
+                     deprecation: Option[String] = None, name: Option[String] = None, profile: Option[String] = None,
+                     title: Option[String] = None, hreflang: Option[String] = None, `type`: Option[String] = None,
+                     templated: Boolean = false) {
+
+    def withDeprecation(url: String) = this.copy(deprecation = Some(url))
+    def withName(name: String) = this.copy(name = Some(name))
+    def withProfile(profile: String) = this.copy(profile = Some(profile))
+    def withTitle(title: String) = this.copy(title = Some(title))
+    def withHreflang(lang: String) = this.copy(hreflang = Some(lang))
+    def withType(mediaType: String) = this.copy(`type` = Some(mediaType))
+  }
 
   object HalLinks {
     def empty = HalLinks(Vector.empty)
@@ -40,14 +51,30 @@ package object hal {
   }
 
   implicit val halLinkWrites = new Writes[HalLinks] {
+
     def writes(hal: HalLinks): JsValue = {
+
       val halLinks = hal.links.map { link =>
-        val href = Json.obj("href" -> JsString(link.href))
+        val href = linkToJson(link)
+
         val links = if (link.templated) href + ("templated" -> JsBoolean(true)) else href
-        link.name -> links
+        link.rel -> links
       }
       Json.obj("_links" -> JsObject(halLinks))
     }
+
+    def linkToJson(link: HalLink): JsObject = {
+      JsObject(List("href" -> JsString(link.href)) ++
+        optAttribute("deprecation", link.deprecation) ++
+        optAttribute("name", link.name) ++
+        optAttribute("profile", link.profile) ++
+        optAttribute("title", link.title) ++
+        optAttribute("type", link.`type`) ++
+        optAttribute("hreflang", link.hreflang).toList)
+    }
+
+    def optAttribute(s: String, option: Option[String]) =
+      option.map(value => (s, JsString(value)))
   }
 
   implicit val halResourceWrites: Writes[HalResource] = new Writes[HalResource] {
