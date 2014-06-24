@@ -4,6 +4,10 @@ import play.api.libs.json._
 
 package object hal {
 
+  object Defaults {
+    val emptyJson = Json.parse("{}").as[JsObject]
+  }
+
   case class HalResource(links: HalLinks, state: JsObject, embedded: Vector[(String, Vector[HalResource])] = Vector.empty) {
     def ++(other: HalResource): HalResource = {
       val d = state ++ other.state
@@ -24,8 +28,9 @@ package object hal {
   case class HalLink(rel: String, href: String,
                      deprecation: Option[String] = None, name: Option[String] = None, profile: Option[String] = None,
                      title: Option[String] = None, hreflang: Option[String] = None, `type`: Option[String] = None,
-                     templated: Boolean = false) {
+                     linkAttr: JsObject = Defaults.emptyJson, templated: Boolean = false) {
 
+    def withLinkAttributes(obj: JsObject) = this.copy(linkAttr = obj)
     def withDeprecation(url: String) = this.copy(deprecation = Some(url))
     def withName(name: String) = this.copy(name = Some(name))
     def withProfile(profile: String) = this.copy(profile = Some(profile))
@@ -70,7 +75,7 @@ package object hal {
         optAttribute("profile", link.profile) ++
         optAttribute("title", link.title) ++
         optAttribute("type", link.`type`) ++
-        optAttribute("hreflang", link.hreflang).toList)
+        optAttribute("hreflang", link.hreflang).toList) ++ link.linkAttr
     }
 
     def optAttribute(s: String, option: Option[String]) =

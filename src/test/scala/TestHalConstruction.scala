@@ -155,4 +155,16 @@ class TestHalConstruction extends FunSuite with Matchers {
     )
   }
 
+  test("provide support for arbitrary link attributes") {
+    Hal.links(
+      HalLink("self", "/orders").withLinkAttributes(Json.obj("isRequired" -> true))
+    ).json should equal(
+
+      Json.parse("""{
+        "_links": {
+               "self": { "href": "/orders", "isRequired": true }
+             }
+        }""".stripMargin)
+    )
+  }
 }
