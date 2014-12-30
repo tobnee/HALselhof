@@ -14,5 +14,7 @@ resolvers += "typesafe repo" at "http://repo.typesafe.com/typesafe/releases/"
 
 libraryDependencies += "com.typesafe.play" %% "play-json" % "2.3.7" % "provided"
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.0" % "test"
+libraryDependencies += "com.typesafe.play" %% "play" % "2.3.7" % "provided"
+
+libraryDependencies += "org.scalatestplus" %% "play" % "1.1.0" % "test"
     

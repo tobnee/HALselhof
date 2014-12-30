@@ -1,7 +1,8 @@
-import org.scalatest.{Matchers, FunSuite}
-import play.api.libs.json.Json
-import play.api.hal._
+package play.api.hal
+
+import org.scalatest.{FunSuite, Matchers}
 import play.api.hal.Hal._
+import play.api.libs.json.Json
 
 class TestHalConstruction extends FunSuite with Matchers {
 
