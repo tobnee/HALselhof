@@ -2,6 +2,9 @@ package play.api
 
 import play.api.libs.json._
 
+/**
+ * Scala model of the JSON Hypertext Application Language according to https://tools.ietf.org/html/draft-kelly-json-hal-06
+ */
 package object hal {
 
   object Defaults {
