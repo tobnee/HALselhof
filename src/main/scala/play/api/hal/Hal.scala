@@ -1,6 +1,6 @@
 package play.api.hal
 
-import play.api.libs.json.{JsValue, Json, Writes, JsObject}
+import play.api.libs.json.{ JsValue, Json, Writes, JsObject }
 
 object Hal {
 
@@ -10,8 +10,7 @@ object Hal {
 
   def links(links: HalLink*) = hal(JsObject(Nil), links.toVector)
 
-  def halSingle[T](content: T, embedded: (String, Vector[HalResource]), links: Vector[HalLink]
-              )(implicit cw: Writes[T]): HalResource = {
+  def halSingle[T](content: T, embedded: (String, Vector[HalResource]), links: Vector[HalLink])(implicit cw: Writes[T]): HalResource = {
     val (name, elems) = embedded
     hal(content, links, Vector(name -> elems))
   }
@@ -23,9 +22,8 @@ object Hal {
   def embeddedLink(link: HalLink, embed: HalResource): HalResource = {
     links(link) ++ embedded(link.rel, embed ++ links(link.copy(rel = "self")))
   }
-  
-  def hal[T](content: T, links: Vector[HalLink], embedded: Vector[(String, Vector[HalResource])] = Vector.empty
-              )(implicit cw: Writes[T]): HalResource = {
+
+  def hal[T](content: T, links: Vector[HalLink], embedded: Vector[(String, Vector[HalResource])] = Vector.empty)(implicit cw: Writes[T]): HalResource = {
     HalResource(
       HalLinks(links),
       Json.toJson(content)(cw).as[JsObject],
@@ -40,7 +38,7 @@ object Hal {
     def asResource = Hal.state(jsValue)
   }
 
-  implicit class HalStateToResource[T : Writes](val link: T) {
+  implicit class HalStateToResource[T: Writes](val link: T) {
     def asResource = Hal.state(link)
   }
 

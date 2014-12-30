@@ -26,9 +26,9 @@ package object hal {
   }
 
   case class HalLink(rel: String, href: String,
-                     deprecation: Option[String] = None, name: Option[String] = None, profile: Option[String] = None,
-                     title: Option[String] = None, hreflang: Option[String] = None, `type`: Option[String] = None,
-                     linkAttr: JsObject = Defaults.emptyJson, templated: Boolean = false) {
+      deprecation: Option[String] = None, name: Option[String] = None, profile: Option[String] = None,
+      title: Option[String] = None, hreflang: Option[String] = None, `type`: Option[String] = None,
+      linkAttr: JsObject = Defaults.emptyJson, templated: Boolean = false) {
 
     def withLinkAttributes(obj: JsObject) = this.copy(linkAttr = obj)
     def withDeprecation(url: String) = this.copy(deprecation = Some(url))
@@ -84,9 +84,7 @@ package object hal {
 
   implicit val halResourceWrites: Writes[HalResource] = new Writes[HalResource] {
     def writes(hal: HalResource): JsValue = {
-
       val embedded = toEmbeddedJson(hal)
-
       val resource = if (hal.links.links.isEmpty) hal.state
       else Json.toJson(hal.links).as[JsObject] ++ hal.state
       if (embedded.fields.isEmpty) resource

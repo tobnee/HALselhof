@@ -12,6 +12,8 @@ scalacOptions  ++= Seq("-unchecked", "-deprecation", "-feature")
 
 resolvers += "typesafe repo" at "http://repo.typesafe.com/typesafe/releases/"
 
+scalariformSettings
+
 libraryDependencies += "com.typesafe.play" %% "play-json" % "2.3.7" % "provided"
 
 libraryDependencies += "com.typesafe.play" %% "play" % "2.3.7" % "provided"
