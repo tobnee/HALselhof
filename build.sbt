@@ -1,12 +1,18 @@
 name := "play-hal"
 
-version := "1.0"
+organization := "net.atinu"
 
-scalaVersion := "2.11.1"
+version := "0.1"
+
+scalaVersion := "2.11.2"
+
+crossScalaVersions := Seq("2.11.2", "2.10.4")
+
+scalacOptions  ++= Seq("-unchecked", "-deprecation", "-feature")
 
 resolvers += "typesafe repo" at "http://repo.typesafe.com/typesafe/releases/"
 
-libraryDependencies += "com.typesafe.play" %% "play-json" % "2.3.0"
+libraryDependencies += "com.typesafe.play" %% "play-json" % "2.3.7" % "provided"
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.0" % "test"
     
