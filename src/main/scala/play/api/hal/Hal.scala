@@ -4,13 +4,15 @@ import play.api.libs.json.{ JsValue, Json, Writes, JsObject }
 
 object Hal {
 
-  def state[T](content: T)(implicit cw: Writes[T]): HalResource = {
-    HalResource(HalLinks.empty, Json.toJson(content)(cw).as[JsObject], Vector.empty)
+  def state[T: Writes](content: T): HalResource = {
+    HalResource(HalLinks.empty, Json.toJson(content).as[JsObject], Vector.empty)
   }
 
-  def links(links: HalLink*) = hal(JsObject(Nil), links.toVector)
+  def links(links: HalLink*): HalResource = hal(JsObject(Nil), links.toVector)
 
-  def halSingle[T](content: T, embedded: (String, Vector[HalResource]), links: Vector[HalLink])(implicit cw: Writes[T]): HalResource = {
+  def linksSeq(links: Seq[HalLink]): HalResource = hal(JsObject(Nil), links.toVector)
+
+  def halSingle[T: Writes](content: T, embedded: (String, Vector[HalResource]), links: Vector[HalLink]): HalResource = {
     val (name, elems) = embedded
     hal(content, links, Vector(name -> elems))
   }
@@ -23,10 +25,10 @@ object Hal {
     links(link) ++ embedded(link.rel, embed ++ links(link.copy(rel = "self")))
   }
 
-  def hal[T](content: T, links: Vector[HalLink], embedded: Vector[(String, Vector[HalResource])] = Vector.empty)(implicit cw: Writes[T]): HalResource = {
+  def hal[T: Writes](content: T, links: Vector[HalLink], embedded: Vector[(String, Vector[HalResource])] = Vector.empty): HalResource = {
     HalResource(
       HalLinks(links),
-      Json.toJson(content)(cw).as[JsObject],
+      Json.toJson(content).as[JsObject],
       embedded)
   }
 

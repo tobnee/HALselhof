@@ -1,10 +1,10 @@
 package play.api.mvc.hal
 
-import org.scalatest.{FunSuite, Matchers}
-import play.api.http.{HeaderNames, Status}
+import org.scalatest.{ FunSuite, Matchers }
+import play.api.http.{ HeaderNames, Status }
 import play.api.libs.json.Json
-import play.api.mvc.{Controller, Result}
-import play.api.test.{DefaultAwaitTimeout, FakeRequest, ResultExtractors}
+import play.api.mvc.{ Controller, Result }
+import play.api.test.{ DefaultAwaitTimeout, FakeRequest, ResultExtractors }
 
 import scala.concurrent.Future
 
