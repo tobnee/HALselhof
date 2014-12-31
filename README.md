@@ -24,6 +24,9 @@ val json = resource.json
 ## Play Framework Integration
 ```scala
 // within a Play Controller HAL resources can be serialized directly and are supported within content negotiation
+import play.api.hal._
+import play.api.mvc.hal._
+
 def halOrJson = Action { implicit request =>
   render {
     case Accepts.Json() => Ok(Json.obj("foo" -> "bar"))
