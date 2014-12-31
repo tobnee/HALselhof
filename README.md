@@ -1,6 +1,8 @@
 # HALselhof
 A [HAL](http://tools.ietf.org/html/draft-kelly-json-hal) library based on [Play-JSON](https://www.playframework.com/documentation/2.3.x/ScalaJson). 
 
+[![Build Status](https://travis-ci.org/tobnee/HALselhof.svg?branch=master)](https://travis-ci.org/tobnee/HALselhof)
+
 ## Standalone Example
 ```scala
 // Test data which should be reflected in the resource state
