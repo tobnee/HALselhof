@@ -15,7 +15,8 @@ trait HalWriteController {
   def halOrJson = Action { implicit request =>
     render {
       case Accepts.Json() => Ok(Json.obj("foo" -> "bar"))
-      case AcceptHal() => Ok(Hal.state(Json.obj("foo" -> "bar")) ++ HalLink("self", "/orders"))
+      case AcceptHal() =>
+        Ok(Hal.state(Json.obj("foo" -> "bar")) ++ HalLink("self", "/orders"))
     }
   }
 

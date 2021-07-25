@@ -8,7 +8,13 @@ import play.api.test.{ DefaultAwaitTimeout, FakeRequest, ResultExtractors }
 
 import scala.concurrent.Future
 
-class ControllerTest extends FunSuite with Matchers with ResultExtractors with HeaderNames with Status with DefaultAwaitTimeout {
+class ControllerTest
+  extends FunSuite
+  with Matchers
+  with ResultExtractors
+  with HeaderNames
+  with Status
+  with DefaultAwaitTimeout {
 
   class TestController() extends Controller with HalWriteController
 
@@ -28,7 +34,8 @@ class ControllerTest extends FunSuite with Matchers with ResultExtractors with H
 
   test("A Resource can be retrived as HAL") {
     val controller = new TestController()
-    val result: Future[Result] = controller.halOrJson.apply(FakeRequest().withHeaders("Accept" -> "application/hal+json"))
+    val result: Future[Result] =
+      controller.halOrJson.apply(FakeRequest().withHeaders("Accept" -> "application/hal+json"))
     contentType(result) should equal(Some("application/hal+json"))
   }
 
