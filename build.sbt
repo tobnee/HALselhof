@@ -1,22 +1,25 @@
-name := "play-hal"
+import CiCommands.{ ciBuild, devBuild }
 
-organization := "net.atinu"
+organization := "io.vangogiel"
+name := "halselhof"
+version := "0.2"
 
-version := "0.1"
+scalaVersion := "2.12.10"
+crossScalaVersions := Seq("2.11.8", "2.12.10")
 
-scalaVersion := "2.11.2"
+scalacOptions ++= Seq(
+  "-unchecked",
+  "-feature",
+  "-Yno-adapted-args",
+  "-Xfuture"
+)
 
-crossScalaVersions := Seq("2.11.2", "2.10.4")
+libraryDependencies ++= Seq(
+  "com.typesafe.play" %% "play-json" % "2.6.3" % "provided",
+  "com.typesafe.play" %% "play" % "2.6.3" % "provided",
+  "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.1" % "test"
+)
 
-scalacOptions  ++= Seq("-unchecked", "-deprecation", "-feature")
+commands ++= Seq(ciBuild, devBuild)
 
-resolvers += "typesafe repo" at "http://repo.typesafe.com/typesafe/releases/"
-
-scalariformSettings
-
-libraryDependencies += "com.typesafe.play" %% "play-json" % "2.3.7" % "provided"
-
-libraryDependencies += "com.typesafe.play" %% "play" % "2.3.7" % "provided"
-
-libraryDependencies += "org.scalatestplus" %% "play" % "1.1.0" % "test"
-    
+licenses := Seq("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0"))
