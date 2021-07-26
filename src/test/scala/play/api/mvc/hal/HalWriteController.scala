@@ -3,7 +3,6 @@ package play.api.mvc.hal
 import play.api.libs.json.Json
 import play.api.mvc._
 import play.api.hal._
-import play.api.mvc.hal._
 
 trait HalWriteController {
   this: Controller =>
@@ -19,5 +18,4 @@ trait HalWriteController {
         Ok(Hal.state(Json.obj("foo" -> "bar")) ++ HalLink("self", "/orders"))
     }
   }
-
 }

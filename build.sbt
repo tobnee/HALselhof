@@ -10,10 +10,8 @@ crossScalaVersions := Seq("2.11.8", "2.12.10")
 scalacOptions ++= Seq(
   "-unchecked",
   "-feature",
-  "-Ywarn-dead-code",
   "-Yno-adapted-args",
-  "-Xfuture",
-  "-Ypartial-unification"
+  "-Xfuture"
 )
 
 libraryDependencies ++= Seq(

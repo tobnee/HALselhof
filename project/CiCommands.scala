@@ -2,12 +2,14 @@ import sbt.Command
 
 object CiCommands {
   def ciBuild: Command = Command.command("ciBuild") { state ⇒
-    "clean" :: "scalafmtSbtCheck" :: "test" ::
+    "clean" :: "scalafmtSbtCheck" :: "scalafmtCheck" ::
+      "test:scalafmtCheck" :: "test" ::
       state
   }
 
   def devBuild: Command = Command.command("devBuild") { state ⇒
-    "clean" :: "scalafmtSbt" :: "test" ::
+    "clean" :: "scalafmtSbt" :: "scalafmt" :: "test:scalafmt" ::
+      "test" ::
       state
   }
 }

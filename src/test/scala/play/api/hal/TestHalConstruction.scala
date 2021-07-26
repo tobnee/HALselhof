@@ -19,7 +19,8 @@ class TestHalConstruction extends FunSuite with Matchers {
       .links(
         HalLink("self", "/orders"),
         HalLink("next", "/orders?page=2"),
-        HalLink("find", "/orders{?id}", templated = true)))
+        HalLink("find", "/orders{?id}", templated = true)
+      ))
       .json should equal(Json.parse("""{
                        "_links": {
                        "self": { "href": "/orders" },
@@ -34,8 +35,7 @@ class TestHalConstruction extends FunSuite with Matchers {
     (data.asResource ++
       HalLink("self", "/orders") ++
       HalLink("next", "/orders?page=2") ++
-      HalLink("find", "/orders{?id}", templated = true)).json should equal(
-        Json.parse("""{
+      HalLink("find", "/orders{?id}", templated = true)).json should equal(Json.parse("""{
                        "_links": {
                        "self": { "href": "/orders" },
                        "next": { "href": "/orders?page=2" },
@@ -56,8 +56,7 @@ class TestHalConstruction extends FunSuite with Matchers {
       .obj("name" -> "Alan Watts", "born" -> "January 6, 1915", "died" -> "November 16, 1973")
       .asResource
 
-    (selfLink ++ Hal.embeddedLink(authorLink, embeddedAuthorState)).json should equal(
-      Json.parse("""{
+    (selfLink ++ Hal.embeddedLink(authorLink, embeddedAuthorState)).json should equal(Json.parse("""{
                  "_links": {
                    "self": { "href": "/blog-post" },
                    "author": { "href": "/people/alan-watts" }
@@ -135,7 +134,8 @@ class TestHalConstruction extends FunSuite with Matchers {
         data.asResource include
           HalLink("self", "/orders") include
           HalLink("next", "/orders?page=2") include
-          HalLink("find", "/orders{?id}", templated = true))
+          HalLink("find", "/orders{?id}", templated = true)
+      )
   }
 
   test("provide support for optional link attributes") {
@@ -143,7 +143,8 @@ class TestHalConstruction extends FunSuite with Matchers {
       .links(
         HalLink("self", "/orders").withDeprecation("http://www.thisisdeprecated.com"),
         HalLink("next", "/orders?page=2").withType("application/json"),
-        HalLink("find", "/orders{?id}", templated = true).withHreflang("de"))
+        HalLink("find", "/orders{?id}", templated = true).withHreflang("de")
+      )
       .json should equal(Json.parse("""{
         "_links": {
                "self": { "href": "/orders", "deprecation": "http://www.thisisdeprecated.com" },

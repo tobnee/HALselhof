@@ -9,12 +9,12 @@ import play.api.test.{ DefaultAwaitTimeout, FakeRequest, ResultExtractors }
 import scala.concurrent.Future
 
 class ControllerTest
-  extends FunSuite
-  with Matchers
-  with ResultExtractors
-  with HeaderNames
-  with Status
-  with DefaultAwaitTimeout {
+    extends FunSuite
+    with Matchers
+    with ResultExtractors
+    with HeaderNames
+    with Status
+    with DefaultAwaitTimeout {
 
   class TestController() extends Controller with HalWriteController
 
