@@ -1,41 +1,44 @@
 package play.api.hal
 
-import org.scalatest.{ FunSuite, Matchers }
+import org.scalatestplus.play.PlaySpec
 import play.api.hal.Hal._
-import play.api.libs.json.Json
+import play.api.libs.json.{ Json, OWrites }
 
-class TestHalConstruction extends FunSuite with Matchers {
+class TestHalConstruction extends PlaySpec {
 
   case class TestData(total: Int, currency: String, status: String)
-  implicit val testWrites = Json.writes[TestData]
+  implicit val testWrites: OWrites[TestData] = Json.writes[TestData]
 
-  test("A mininmal HAL resource is a JSON object") {
-    val data = TestData(20, "EUR", "shipped")
-    data.asResource.json should equal(Json.toJson(data))
-  }
+  "A HAL resource" should {
 
-  test("A HAL resource may contain only links") {
-    (Hal
-      .links(
-        HalLink("self", "/orders"),
-        HalLink("next", "/orders?page=2"),
-        HalLink("find", "/orders{?id}", templated = true)
-      ))
-      .json should equal(Json.parse("""{
+    "be a JSON object" in {
+      val data = TestData(20, "EUR", "shipped")
+      data.asResource.json mustBe Json.toJson(data)
+    }
+
+    "contain only links" in {
+      Hal
+        .links(
+          HalLink("self", "/orders"),
+          HalLink("next", "/orders?page=2"),
+          HalLink("find", "/orders{?id}", templated = true)
+        )
+        .json mustBe Json.parse("""{
                        "_links": {
                        "self": { "href": "/orders" },
                        "next": { "href": "/orders?page=2" },
                        "find": { "href": "/orders{?id}", "templated": true }
                         }
-                        }""".stripMargin))
-  }
+                        }""".stripMargin)
+    }
 
-  test("A HAL resouce may contain links and state") {
-    val data = TestData(20, "EUR", "shipped")
-    (data.asResource ++
-      HalLink("self", "/orders") ++
-      HalLink("next", "/orders?page=2") ++
-      HalLink("find", "/orders{?id}", templated = true)).json should equal(Json.parse("""{
+    "contain links and state" in {
+      val data = TestData(20, "EUR", "shipped")
+      (data.asResource ++
+        HalLink("self", "/orders") ++
+        HalLink("next", "/orders?page=2") ++
+        HalLink("find", "/orders{?id}", templated = true)).json mustBe
+        Json.parse("""{
                        "_links": {
                        "self": { "href": "/orders" },
                        "next": { "href": "/orders?page=2" },
@@ -44,19 +47,20 @@ class TestHalConstruction extends FunSuite with Matchers {
                          "total" : 20,
                          "currency" : "EUR",
                          "status": "shipped"
-                        }""".stripMargin))
-  }
+                        }""".stripMargin)
+    }
 
-  test("a HAL resource may embed links") {
-    val json = TestData(20, "EUR", "shipped")
-    Json.toJson(Hal.state(json))
-    val selfLink = HalLink("self", "/blog-post").asResource
-    val authorLink = HalLink("author", "/people/alan-watts")
-    val embeddedAuthorState = Json
-      .obj("name" -> "Alan Watts", "born" -> "January 6, 1915", "died" -> "November 16, 1973")
-      .asResource
+    "embed links" in {
+      val json = TestData(20, "EUR", "shipped")
+      Json.toJson(Hal.state(json))
+      val selfLink = HalLink("self", "/blog-post").asResource
+      val authorLink = HalLink("author", "/people/alan-watts")
+      val embeddedAuthorState = Json
+        .obj("name" -> "Alan Watts", "born" -> "January 6, 1915", "died" -> "November 16, 1973")
+        .asResource
 
-    (selfLink ++ Hal.embeddedLink(authorLink, embeddedAuthorState)).json should equal(Json.parse("""{
+      (selfLink ++ Hal.embeddedLink(authorLink, embeddedAuthorState)).json mustBe
+        Json.parse("""{
                  "_links": {
                    "self": { "href": "/blog-post" },
                    "author": { "href": "/people/alan-watts" }
@@ -69,31 +73,31 @@ class TestHalConstruction extends FunSuite with Matchers {
                      "died": "November 16, 1973"
                    }
                  }
-                  }""".stripMargin))
-  }
+                  }""".stripMargin)
+    }
 
-  test("a HAL resource may embed multible resources") {
-    val baseResource =
-      Json.obj("currentlyProcessing" -> 14, "shippedToday" -> 20).asResource ++
-        HalLink("self", "/orders") ++
-        HalLink("next", "/orders?page=2") ++
-        HalLink("find", "/orders{?id}", templated = true)
+    "embed multiple resources" in {
+      val baseResource =
+        Json.obj("currentlyProcessing" -> 14, "shippedToday" -> 20).asResource ++
+          HalLink("self", "/orders") ++
+          HalLink("next", "/orders?page=2") ++
+          HalLink("find", "/orders{?id}", templated = true)
 
-    val resource1 =
-      TestData(30, "USD", "shipped").asResource ++
-        HalLink("self", "/orders/123") ++
-        HalLink("basket", "/baskets/98712") ++
-        HalLink("customer", "/customers/7809")
+      val resource1 =
+        TestData(30, "USD", "shipped").asResource ++
+          HalLink("self", "/orders/123") ++
+          HalLink("basket", "/baskets/98712") ++
+          HalLink("customer", "/customers/7809")
 
-    val resource2 =
-      TestData(20, "USD", "processing").asResource ++
-        HalLink("self", "/orders/124") ++
-        HalLink("basket", "/baskets/97213") ++
-        HalLink("customer", "/customers/12369")
+      val resource2 =
+        TestData(20, "USD", "processing").asResource ++
+          HalLink("self", "/orders/124") ++
+          HalLink("basket", "/baskets/97213") ++
+          HalLink("customer", "/customers/12369")
 
-    val res = baseResource ++ Hal.embedded("orders", resource1, resource2)
+      val res = baseResource ++ Hal.embedded("orders", resource1, resource2)
 
-    res.json should equal(Json.parse("""{
+      res.json mustBe Json.parse("""{
       "_links": {
         "self": { "href": "/orders" },
         "next": { "href": "/orders?page=2" },
@@ -122,55 +126,55 @@ class TestHalConstruction extends FunSuite with Matchers {
       },
       "currentlyProcessing": 14,
       "shippedToday": 20
-      }""".stripMargin))
-  }
+      }""".stripMargin)
+    }
 
-  test("provide alternative names for composition") {
-    val data = TestData(20, "EUR", "shipped")
-    data.asResource ++
-      HalLink("self", "/orders") ++
-      HalLink("next", "/orders?page=2") ++
-      HalLink("find", "/orders{?id}", templated = true) should equal(
-        data.asResource include
+    "provide alternative names for composition" in {
+      val data = TestData(20, "EUR", "shipped")
+      data.asResource ++
+        HalLink("self", "/orders") ++
+        HalLink("next", "/orders?page=2") ++
+        HalLink("find", "/orders{?id}", templated = true) mustBe
+        (data.asResource include
           HalLink("self", "/orders") include
           HalLink("next", "/orders?page=2") include
-          HalLink("find", "/orders{?id}", templated = true)
-      )
-  }
+          HalLink("find", "/orders{?id}", templated = true))
+    }
 
-  test("provide support for optional link attributes") {
-    Hal
-      .links(
-        HalLink("self", "/orders").withDeprecation("http://www.thisisdeprecated.com"),
-        HalLink("next", "/orders?page=2").withType("application/json"),
-        HalLink("find", "/orders{?id}", templated = true).withHreflang("de")
-      )
-      .json should equal(Json.parse("""{
+    "provide support for optional link attributes" in {
+      Hal
+        .links(
+          HalLink("self", "/orders").withDeprecation("http://www.thisisdeprecated.com"),
+          HalLink("next", "/orders?page=2").withType("application/json"),
+          HalLink("find", "/orders{?id}", templated = true).withHreflang("de")
+        )
+        .json mustBe Json.parse("""{
         "_links": {
                "self": { "href": "/orders", "deprecation": "http://www.thisisdeprecated.com" },
                "next": { "href": "/orders?page=2", "type": "application/json" },
                "find": { "href": "/orders{?id}", "templated": true, "hreflang": "de" }
              }
-        }""".stripMargin))
-  }
+        }""".stripMargin)
+    }
 
-  test("provide support for arbitrary link attributes") {
-    Hal
-      .links(HalLink("self", "/orders").withLinkAttributes(Json.obj("isRequired" -> true)))
-      .json should equal(Json.parse("""{
+    "provide support for arbitrary link attributes" in {
+      Hal
+        .links(HalLink("self", "/orders").withLinkAttributes(Json.obj("isRequired" -> true)))
+        .json mustBe Json.parse("""{
         "_links": {
                "self": { "href": "/orders", "isRequired": true }
              }
-        }""".stripMargin))
-  }
+        }""".stripMargin)
+    }
 
-  test("provide support for arbitrary link attributes (from seq)") {
-    Hal
-      .linksSeq(HalLink("self", "/orders").withLinkAttributes(Json.obj("isRequired" -> true)) :: Nil)
-      .json should equal(Json.parse("""{
+    "provide support for arbitrary link attributes (from seq)" in {
+      Hal
+        .linksSeq(HalLink("self", "/orders").withLinkAttributes(Json.obj("isRequired" -> true)) :: Nil)
+        .json mustBe Json.parse("""{
         "_links": {
                "self": { "href": "/orders", "isRequired": true }
              }
-        }""".stripMargin))
+        }""".stripMargin)
+    }
   }
 }
