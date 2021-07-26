@@ -14,7 +14,7 @@ class HalWriteController(cc: ControllerComponents) extends AbstractController(cc
     render {
       case Accepts.Json() => Ok(Json.obj("foo" -> "bar"))
       case AcceptHal() =>
-        Ok(Hal.state(Json.obj("foo" -> "bar")) ++ HalLink("self", "/orders"))
+        Ok(Hal.state(Json.obj("foo" -> "bar")) ++ HalRelation("self", "/orders"))
     }
   }
 }

@@ -2,7 +2,7 @@ import CiCommands.{ ciBuild, devBuild }
 
 organization := "io.vangogiel"
 name := "halselhof"
-version := "0.2"
+version := "0.3"
 
 scalaVersion := "2.12.10"
 crossScalaVersions := Seq("2.11.8", "2.12.10")

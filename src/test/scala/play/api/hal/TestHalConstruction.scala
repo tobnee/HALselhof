@@ -9,6 +9,40 @@ class TestHalConstruction extends PlaySpec {
   case class TestData(total: Int, currency: String, status: String)
   implicit val testWrites: OWrites[TestData] = Json.writes[TestData]
 
+  "A HAL relation" should {
+
+    "render href as a JSON object" in {
+      val data = HalHref("/orders")
+      data.asResource.json mustBe Json.parse("""{
+           "href": "/orders"
+           }
+       """.stripMargin)
+    }
+
+    "be a single link" in {
+      val data: HalSingleRelation = HalRelation("order", HalHref("/order"))
+      data.asResource.json mustBe Json.parse("""{
+          "_links": {
+          "order" : { "href": "/order"}
+           }
+           }""".stripMargin)
+    }
+
+    "render a link to share relation with another link" in {
+      Hal
+        .links(
+          HalRelation("orders", List(HalHref("/orders/1"), HalHref("/orders/2"))),
+          HalRelation("find", "/search{?id}", templated = true)
+        )
+        .json mustBe Json.parse("""{
+          "_links": {
+          "orders" : [{ "href": "/orders/1"}, { "href": "/orders/2"}],
+          "find":{"href":"/search{?id}","templated":true}
+           }
+           }""".stripMargin)
+    }
+  }
+
   "A HAL resource" should {
 
     "be a JSON object" in {
@@ -19,9 +53,9 @@ class TestHalConstruction extends PlaySpec {
     "contain only links" in {
       Hal
         .links(
-          HalLink("self", "/orders"),
-          HalLink("next", "/orders?page=2"),
-          HalLink("find", "/orders{?id}", templated = true)
+          HalRelation("self", "/orders"),
+          HalRelation("next", "/orders?page=2"),
+          HalRelation("find", "/orders{?id}", templated = true)
         )
         .json mustBe Json.parse("""{
                        "_links": {
@@ -35,9 +69,9 @@ class TestHalConstruction extends PlaySpec {
     "contain links and state" in {
       val data = TestData(20, "EUR", "shipped")
       (data.asResource ++
-        HalLink("self", "/orders") ++
-        HalLink("next", "/orders?page=2") ++
-        HalLink("find", "/orders{?id}", templated = true)).json mustBe
+        HalRelation("self", "/orders") ++
+        HalRelation("next", "/orders?page=2") ++
+        HalRelation("find", "/orders{?id}", templated = true)).json mustBe
         Json.parse("""{
                        "_links": {
                        "self": { "href": "/orders" },
@@ -53,8 +87,8 @@ class TestHalConstruction extends PlaySpec {
     "embed links" in {
       val json = TestData(20, "EUR", "shipped")
       Json.toJson(Hal.state(json))
-      val selfLink = HalLink("self", "/blog-post").asResource
-      val authorLink = HalLink("author", "/people/alan-watts")
+      val selfLink = HalRelation("self", "/blog-post").asResource
+      val authorLink = HalRelation("author", "/people/alan-watts")
       val embeddedAuthorState = Json
         .obj("name" -> "Alan Watts", "born" -> "January 6, 1915", "died" -> "November 16, 1973")
         .asResource
@@ -79,21 +113,21 @@ class TestHalConstruction extends PlaySpec {
     "embed multiple resources" in {
       val baseResource =
         Json.obj("currentlyProcessing" -> 14, "shippedToday" -> 20).asResource ++
-          HalLink("self", "/orders") ++
-          HalLink("next", "/orders?page=2") ++
-          HalLink("find", "/orders{?id}", templated = true)
+          HalRelation("self", "/orders") ++
+          HalRelation("next", "/orders?page=2") ++
+          HalRelation("find", "/orders{?id}", templated = true)
 
       val resource1 =
         TestData(30, "USD", "shipped").asResource ++
-          HalLink("self", "/orders/123") ++
-          HalLink("basket", "/baskets/98712") ++
-          HalLink("customer", "/customers/7809")
+          HalRelation("self", "/orders/123") ++
+          HalRelation("basket", "/baskets/98712") ++
+          HalRelation("customer", "/customers/7809")
 
       val resource2 =
         TestData(20, "USD", "processing").asResource ++
-          HalLink("self", "/orders/124") ++
-          HalLink("basket", "/baskets/97213") ++
-          HalLink("customer", "/customers/12369")
+          HalRelation("self", "/orders/124") ++
+          HalRelation("basket", "/baskets/97213") ++
+          HalRelation("customer", "/customers/12369")
 
       val res = baseResource ++ Hal.embedded("orders", resource1, resource2)
 
@@ -132,21 +166,21 @@ class TestHalConstruction extends PlaySpec {
     "provide alternative names for composition" in {
       val data = TestData(20, "EUR", "shipped")
       data.asResource ++
-        HalLink("self", "/orders") ++
-        HalLink("next", "/orders?page=2") ++
-        HalLink("find", "/orders{?id}", templated = true) mustBe
+        HalRelation("self", "/orders") ++
+        HalRelation("next", "/orders?page=2") ++
+        HalRelation("find", "/orders{?id}", templated = true) mustBe
         (data.asResource include
-          HalLink("self", "/orders") include
-          HalLink("next", "/orders?page=2") include
-          HalLink("find", "/orders{?id}", templated = true))
+          HalRelation("self", "/orders") include
+          HalRelation("next", "/orders?page=2") include
+          HalRelation("find", "/orders{?id}", templated = true))
     }
 
     "provide support for optional link attributes" in {
       Hal
         .links(
-          HalLink("self", "/orders").withDeprecation("http://www.thisisdeprecated.com"),
-          HalLink("next", "/orders?page=2").withType("application/json"),
-          HalLink("find", "/orders{?id}", templated = true).withHreflang("de")
+          HalRelation("self", HalHref("/orders").withDeprecation("http://www.thisisdeprecated.com")),
+          HalRelation("next", HalHref("/orders?page=2").withType("application/json")),
+          HalRelation("find", HalHref("/orders{?id}", templated = true).withHreflang("de"))
         )
         .json mustBe Json.parse("""{
         "_links": {
@@ -159,7 +193,7 @@ class TestHalConstruction extends PlaySpec {
 
     "provide support for arbitrary link attributes" in {
       Hal
-        .links(HalLink("self", "/orders").withLinkAttributes(Json.obj("isRequired" -> true)))
+        .links(HalRelation("self", HalHref("/orders").withLinkAttributes(Json.obj("isRequired" -> true))))
         .json mustBe Json.parse("""{
         "_links": {
                "self": { "href": "/orders", "isRequired": true }
@@ -169,7 +203,7 @@ class TestHalConstruction extends PlaySpec {
 
     "provide support for arbitrary link attributes (from seq)" in {
       Hal
-        .linksSeq(HalLink("self", "/orders").withLinkAttributes(Json.obj("isRequired" -> true)) :: Nil)
+        .linksSeq(HalRelation("self", HalHref("/orders").withLinkAttributes(Json.obj("isRequired" -> true))) :: Nil)
         .json mustBe Json.parse("""{
         "_links": {
                "self": { "href": "/orders", "isRequired": true }
