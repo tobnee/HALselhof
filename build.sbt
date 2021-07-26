@@ -17,7 +17,7 @@ scalacOptions ++= Seq(
 libraryDependencies ++= Seq(
   "com.typesafe.play" %% "play-json" % "2.6.3" % "provided",
   "com.typesafe.play" %% "play" % "2.6.3" % "provided",
-  "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.1" % "test"
+  "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % "test"
 )
 
 commands ++= Seq(ciBuild, devBuild)
