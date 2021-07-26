@@ -25,14 +25,32 @@ package object hal {
 
     def include(other: HalResource): HalResource = ++(other)
 
-    def ++(link: HalLink): HalResource =
+    def ++(link: HalRelation): HalResource =
       this.copy(links = links ++ link)
 
-    def include(link: HalLink): HalResource = ++(link)
+    def include(link: HalRelation): HalResource = ++(link)
   }
 
-  case class HalLink(
-      rel: String,
+  object HalLinks {
+    def empty: HalLinks = HalLinks(Vector.empty)
+
+    implicit val halLinksWrites: Writes[HalLinks] = Writes { (halLinks: HalLinks) =>
+      {
+        val _links = halLinks.links.foldLeft(JsObject(Seq())) { (_links, relation) =>
+          {
+            val href: JsValue = relation match {
+              case HalSingleRelation(rel, href)    => Json.toJson(href)
+              case HalMultipleRelation(rel, hrefs) => Json.toJson(hrefs)
+            }
+            _links.+((relation.rel, href))
+          }
+        }
+        JsObject(Seq(("_links", _links)))
+      }
+    }
+  }
+
+  case class HalHref(
       href: String,
       deprecation: Option[String] = None,
       name: Option[String] = None,
@@ -44,58 +62,88 @@ package object hal {
       templated: Boolean = false
   ) {
 
-    def withLinkAttributes(obj: JsObject): HalLink = this.copy(linkAttr = obj)
-    def withDeprecation(url: String): HalLink = this.copy(deprecation = Some(url))
-    def withName(name: String): HalLink = this.copy(name = Some(name))
-    def withProfile(profile: String): HalLink = this.copy(profile = Some(profile))
-    def withTitle(title: String): HalLink = this.copy(title = Some(title))
-    def withHreflang(lang: String): HalLink = this.copy(hreflang = Some(lang))
-    def withType(mediaType: String): HalLink = this.copy(`type` = Some(mediaType))
+    def withLinkAttributes(obj: JsObject): HalHref = this.copy(linkAttr = obj)
+    def withDeprecation(url: String): HalHref = this.copy(deprecation = Some(url))
+    def withName(name: String): HalHref = this.copy(name = Some(name))
+    def withProfile(profile: String): HalHref = this.copy(profile = Some(profile))
+    def withTitle(title: String): HalHref = this.copy(title = Some(title))
+    def withHreflang(lang: String): HalHref = this.copy(hreflang = Some(lang))
+    def withType(mediaType: String): HalHref = this.copy(`type` = Some(mediaType))
   }
 
-  object HalLinks {
-    def empty: HalLinks = HalLinks(Vector.empty)
+  object HalHref {
+    implicit val halHrefWrites: Writes[HalHref] = Writes { (href: HalHref) =>
+      val result = JsObject(
+        List("href" -> JsString(href.href)) ++
+          optAttribute("deprecation", href.deprecation) ++
+          optAttribute("name", href.name) ++
+          optAttribute("profile", href.profile) ++
+          optAttribute("title", href.title) ++
+          optAttribute("type", href.`type`) ++
+          optAttribute("hreflang", href.hreflang).toList
+      ) ++ href.linkAttr
+      if (href.templated) result + ("templated" -> JsBoolean(true)) else result
+    }
+    def optAttribute(s: String, option: Option[String]): Option[(String, JsString)] =
+      option.map(value => (s, JsString(value)))
+
   }
 
-  case class HalLinks(links: Vector[HalLink]) {
+  sealed trait HalRelation {
+    val rel: String
+  }
+
+  case class HalSingleRelation(rel: String, href: HalHref) extends HalRelation
+
+  object HalSingleRelation {
+    implicit val halSingleRelationFormat: Writes[HalSingleRelation] = Writes { (relation: HalSingleRelation) =>
+      JsObject(List(relation.rel -> Json.toJson(relation.href)))
+    }
+  }
+
+  case class HalMultipleRelation(rel: String, hrefs: Seq[HalHref]) extends HalRelation
+
+  object HalMultipleRelation {
+    implicit val halMultipleRelationFormat = Json.writes[HalMultipleRelation]
+  }
+
+  object HalRelation {
+
+    implicit val halRelationWrite: Writes[HalRelation] = Writes { (relation: HalRelation) =>
+      relation match {
+        case HalSingleRelation(rel, href)    => JsObject(List(rel -> Json.toJson(href)))
+        case HalMultipleRelation(rel, hrefs) => JsObject(List(rel -> Json.toJson(hrefs)))
+      }
+    }
+
+    def apply(
+        rel: String,
+        href: String,
+        deprecation: Option[String] = None,
+        name: Option[String] = None,
+        profile: Option[String] = None,
+        title: Option[String] = None,
+        hreflang: Option[String] = None,
+        `type`: Option[String] = None,
+        linkAttr: JsObject = Defaults.emptyJson,
+        templated: Boolean = false
+    ): HalSingleRelation =
+      HalSingleRelation(rel, HalHref(href, deprecation, name, profile, title, hreflang, `type`, linkAttr, templated))
+
+    def apply(rel: String, href: HalHref): HalSingleRelation = HalSingleRelation(rel, href)
+    def apply(rel: String, hrefs: Seq[HalHref]): HalMultipleRelation = HalMultipleRelation(rel, hrefs)
+  }
+
+  case class HalLinks(links: Vector[HalRelation]) {
 
     def ++(other: HalLinks): HalLinks =
       HalLinks(links ++ other.links)
 
     def include(other: HalLinks): HalLinks = ++(other)
 
-    def ++(link: HalLink): HalLinks = HalLinks(link +: this.links)
+    def ++(link: HalRelation): HalLinks = HalLinks(link +: this.links)
 
-    def include(link: HalLink): HalLinks = ++(link)
-  }
-
-  implicit val halLinkWrites: Writes[HalLinks] = new Writes[HalLinks] {
-
-    def writes(hal: HalLinks): JsValue = {
-
-      val halLinks = hal.links.map { link =>
-        val href = linkToJson(link)
-
-        val links =
-          if (link.templated) href + ("templated" -> JsBoolean(true)) else href
-        link.rel -> links
-      }
-      Json.obj("_links" -> JsObject(halLinks))
-    }
-
-    def linkToJson(link: HalLink): JsObject =
-      JsObject(
-        List("href" -> JsString(link.href)) ++
-          optAttribute("deprecation", link.deprecation) ++
-          optAttribute("name", link.name) ++
-          optAttribute("profile", link.profile) ++
-          optAttribute("title", link.title) ++
-          optAttribute("type", link.`type`) ++
-          optAttribute("hreflang", link.hreflang).toList
-      ) ++ link.linkAttr
-
-    def optAttribute(s: String, option: Option[String]): Option[(String, JsString)] =
-      option.map(value => (s, JsString(value)))
+    def include(link: HalRelation): HalLinks = ++(link)
   }
 
   implicit val halResourceWrites: Writes[HalResource] =

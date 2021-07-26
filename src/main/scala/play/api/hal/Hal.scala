@@ -14,12 +14,12 @@ object Hal {
   /** A HAL resource containing only links
     * @param links links to be contained in the resource
     */
-  def links(links: HalLink*): HalResource = hal(JsObject(Nil), links.toVector)
+  def links(links: HalRelation*): HalResource = hal(JsObject(Nil), links.toVector)
 
   /** A HAL resource containing only links
     * @param links links to be contained in the resource
     */
-  def linksSeq(links: Seq[HalLink]): HalResource =
+  def linksSeq(links: Seq[HalRelation]): HalResource =
     hal(JsObject(Nil), links.toVector)
 
   /** A HAL resource with at least one embedded resource
@@ -33,8 +33,12 @@ object Hal {
     * @param link self link of the embedded resource
     * @param embed resource to be embedded
     */
-  def embeddedLink(link: HalLink, embed: HalResource): HalResource =
-    links(link) ++ embedded(link.rel, embed ++ links(link.copy(rel = "self")))
+  def embeddedLink(link: HalRelation, embed: HalResource): HalResource = {
+    link match {
+      case sr: HalSingleRelation   => links(sr) ++ embedded(sr.rel, embed ++ links(sr.copy(rel = "self")))
+      case mr: HalMultipleRelation => links(mr) ++ embedded(mr.rel, embed ++ links(mr.copy(rel = "self")))
+    }
+  }
 
   /** Construct a fully featured HAL resource by providing all of it components
     * @param content state of the resource
@@ -43,24 +47,24 @@ object Hal {
     */
   def hal[T: Writes](
       content: T,
-      links: Vector[HalLink],
+      links: Vector[HalRelation],
       embedded: Vector[(String, Vector[HalResource])] = Vector.empty
   ): HalResource =
     HalResource(HalLinks(links), Json.toJson(content).as[JsObject], embedded)
 
-  implicit class HalLinkToResource(val link: HalLink) extends AnyVal {
-    def asResource = Hal.links(link)
+  implicit class HalRelationToResource(val link: HalRelation) extends AnyVal {
+    def asResource: HalResource = Hal.links(link)
   }
 
   implicit class JsonToResource(val jsValue: JsValue) extends AnyVal {
-    def asResource = Hal.state(jsValue)
+    def asResource: HalResource = Hal.state(jsValue)
   }
 
   implicit class HalStateToResource[T: Writes](val link: T) {
-    def asResource = Hal.state(link)
+    def asResource: HalResource = Hal.state(link)
   }
 
   implicit class HalResourceToJson(val hal: HalResource) extends AnyVal {
-    def json = Json.toJson(hal)
+    def json: JsValue = Json.toJson(hal)
   }
 }

@@ -24,15 +24,17 @@ val json = resource.json
 [Examples](https://github.com/tobnee/HALselhof/blob/master/src/test/scala/play/api/hal/TestHalConstruction.scala)
 
 ## Play Framework Integration
+
 ```scala
 // within a Play Controller HAL resources can be serialized directly and are supported within content negotiation
+
 import play.api.hal._
 import play.api.mvc.hal._
 
 def halOrJson = Action { implicit request =>
   render {
     case Accepts.Json() => Ok(Json.obj("foo" -> "bar"))
-    case AcceptHal() => Ok(Hal.state(Json.obj("foo" -> "bar")) ++ HalLink("self", "/foo"))
+    case AcceptHal() => Ok(Hal.state(Json.obj("foo" -> "bar")) ++ HalRelation("self", "/foo"))
   }
 }
 ```
