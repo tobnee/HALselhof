@@ -9,9 +9,13 @@ crossScalaVersions := Seq("2.11.8", "2.12.10")
 
 scalacOptions ++= Seq(
   "-unchecked",
+  "-deprecation",
   "-feature",
+  "-Ywarn-unused-import",
+  "-Ywarn-dead-code",
   "-Yno-adapted-args",
-  "-Xfuture"
+  "-Xfuture",
+  "-Xfatal-warnings"
 )
 
 libraryDependencies ++= Seq(
