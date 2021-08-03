@@ -12,4 +12,5 @@ dist
 /.classpath
 /.project
 /.settings
+/.bsp
 *~
