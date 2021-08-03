@@ -86,7 +86,6 @@ package object hal {
     }
     def optAttribute(s: String, option: Option[String]): Option[(String, JsString)] =
       option.map(value => (s, JsString(value)))
-
   }
 
   sealed trait HalRelation {
