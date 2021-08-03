@@ -21,7 +21,7 @@ val resource: HalResource = data.asResource ++
 // transfer the resource to the Play JSON AST
 val json = resource.json
 ```
-[Examples](https://github.com/tobnee/HALselhof/blob/master/src/test/scala/play/api/hal/TestHalConstruction.scala)
+[Examples](./src/test/scala/play/api/hal/TestHalConstruction.scala)
 
 ## Play Framework Integration
 
