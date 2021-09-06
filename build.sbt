@@ -1,4 +1,5 @@
 import CiCommands.{ ciBuild, devBuild }
+import com.jsuereth.sbtpgp.PgpKeys.gpgCommand
 
 organization := "io.vangogiel"
 name := "halselhof"
@@ -29,4 +30,42 @@ commands ++= Seq(ciBuild, devBuild)
 coverageMinimum := 100
 coverageFailOnMinimum := true
 
-licenses := Seq("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0"))
+Global / gpgCommand := (baseDirectory.value / ".." / "gpg.sh").getAbsolutePath
+
+credentials += Credentials(
+  "Sonatype Nexus Repository Manager",
+  "s01.oss.sonatype.org",
+  sys.env.getOrElse("SONATYPE_NEXUS_USERNAME", ""),
+  sys.env.getOrElse("SONATYPE_NEXUS_PASSWORD", "")
+)
+
+ThisBuild / organization := "io.vangogiel.halselhof"
+ThisBuild / organizationName := "vangogiel"
+ThisBuild / organizationHomepage := Some(url("http://vangogiel.io/"))
+
+ThisBuild / scmInfo := Some(
+  ScmInfo(
+    url("https://github.com/vangogiel/halselhof"),
+    "scm:git@github.com:vangogiel/halselhof.git"
+  )
+)
+ThisBuild / developers := List(
+  Developer(
+    id = "vangogiel",
+    name = "Norbert Gogiel",
+    email = "vangogiel@hotmail.co.uk",
+    url = url("http://vangogiel.io")
+  )
+)
+
+ThisBuild / licenses := List("Apache 2" -> new URL("http://www.apache.org/licenses/LICENSE-2.0.txt"))
+ThisBuild / homepage := Some(url("https://github.com/vangogiel/halselhof"))
+ThisBuild / pomIncludeRepository := { _ =>
+  false
+}
+ThisBuild / publishTo := {
+  val nexus = "https://s01.oss.sonatype.org/"
+  if (isSnapshot.value) Some("snapshots" at nexus + "content/repositories/snapshots")
+  else Some("releases" at nexus + "service/local/staging/deploy/maven2")
+}
+ThisBuild / publishMavenStyle := true
