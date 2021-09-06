@@ -69,6 +69,7 @@ package object hal {
     def withTitle(title: String): HalHref = this.copy(title = Some(title))
     def withHreflang(lang: String): HalHref = this.copy(hreflang = Some(lang))
     def withType(mediaType: String): HalHref = this.copy(`type` = Some(mediaType))
+    def withTemplated(): HalHref = this.copy(templated = true)
   }
 
   object HalHref {
