@@ -1,5 +1,6 @@
 package play.api.hal
 
+import play.api.hal.Hal._
 import play.api.libs.json.{ JsObject, JsValue, Json, Writes }
 
 object Hal {
@@ -67,4 +68,39 @@ object Hal {
   implicit class HalResourceToJson(val hal: HalResource) extends AnyVal {
     def json: JsValue = Json.toJson(hal)
   }
+}
+
+object HalBuilder {
+  def apply(): Hal = Hal()
+}
+
+case class Hal(
+    links: Seq[HalRelation] = Seq.empty,
+    embedded: Option[HalResource] = None
+) {
+
+  /** Append HAL relation to the builder
+    *
+    * @param rel name of the relation
+    * @param href HalHref to be appended
+    * @return the builder
+    */
+  def withRelation(rel: String, href: HalHref): Hal = this.copy(links :+ HalSingleRelation(rel, href))
+
+  /** Append multiple HAL relations to the builder
+    * @param rel name of the relation
+    * @param hrefs relations in Seq to be appended
+    * @return the builder
+    */
+  def withRelation(rel: String, hrefs: Seq[HalHref]): Hal = this.copy(links :+ HalMultipleRelation(rel, hrefs))
+
+  /** Builder by delegating to another function
+    * @return the combination built as HalResource
+    */
+  def build(): HalResource = hal(JsObject(Nil), links.toVector)
+
+  /** Builder by delegating to another function
+    * @return the combination built as JsValue
+    */
+  def buildJson(): JsValue = build().json
 }

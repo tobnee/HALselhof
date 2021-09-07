@@ -247,7 +247,7 @@ class TestHalConstruction extends PlaySpec {
         HalRelation("next", HalHref("/orders?page=2").withType("application/json"))
       )
       val links2: Vector[HalRelation] = Vector(
-        HalRelation("find", HalHref("/orders{?id}", templated = true).withHreflang("de"))
+        HalRelation("find", HalHref("/orders{?id}").withHreflang("de").withTemplated())
       )
       val data: HalLinks = HalLinks(links1) include HalLinks(links2)
       data.asResource.json mustBe Json.parse(
