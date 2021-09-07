@@ -3,7 +3,7 @@ import com.jsuereth.sbtpgp.PgpKeys.gpgCommand
 
 organization := "io.vangogiel"
 name := "halselhof"
-version := "0.3"
+version := "0.4"
 
 scalaVersion := "2.12.10"
 crossScalaVersions := Seq("2.11.8", "2.12.10")
