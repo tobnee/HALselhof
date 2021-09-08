@@ -3,25 +3,25 @@ import com.jsuereth.sbtpgp.PgpKeys.gpgCommand
 
 organization := "io.vangogiel"
 name := "halselhof"
-version := "0.4"
+version := "0.5"
 
-scalaVersion := "2.12.10"
+scalaVersion := "2.13.0"
 crossScalaVersions := Seq("2.11.8", "2.12.10")
 
 scalacOptions ++= Seq(
   "-unchecked",
   "-deprecation",
   "-feature",
-  "-Ywarn-unused-import",
+  "-Ywarn-unused:imports",
   "-Ywarn-dead-code",
-  "-Yno-adapted-args",
-  "-Xfuture",
+  "-Xlint:adapted-args",
+  "-Xsource:2.13",
   "-Xfatal-warnings"
 )
 
 libraryDependencies ++= Seq(
-  "com.typesafe.play" %% "play-json" % "2.6.3" % "provided",
-  "com.typesafe.play" %% "play" % "2.6.3" % "provided",
+  "com.typesafe.play" %% "play-json" % "2.9.2",
+  "com.typesafe.play" %% "play" % "2.8.8",
   "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % "test"
 )
 
