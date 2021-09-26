@@ -30,8 +30,6 @@ commands ++= Seq(ciBuild, devBuild)
 coverageMinimum := 100
 coverageFailOnMinimum := true
 
-Global / gpgCommand := (baseDirectory.value / ".." / "gpg.sh").getAbsolutePath
-
 credentials += Credentials(
   "Sonatype Nexus Repository Manager",
   "s01.oss.sonatype.org",
