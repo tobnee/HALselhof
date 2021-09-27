@@ -1,0 +1,19 @@
+name: Release
+on:
+  push:
+    branches: [master, main]
+    tags: ["*"]
+jobs:
+  publish:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2.3.4
+        with:
+          fetch-depth: 0
+      - uses: olafurpg/setup-scala@v13
+      - run: sbt ci-release
+        env:
+          PGP_SECRET: ${{ secrets.GPG_SIGNING_KEY }}
+          PGP_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_NEXUS_USERNAME }}
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_NEXUS_PASSWORD }}
