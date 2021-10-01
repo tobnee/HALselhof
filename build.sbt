@@ -1,7 +1,7 @@
 import CiCommands.{ ciBuild, devBuild }
 
-scalaVersion := "2.13.0"
-crossScalaVersions := Seq("2.12.10", "2.13.0")
+scalaVersion := "2.13.6"
+crossScalaVersions := Seq("2.12.10", "2.13.6")
 
 inThisBuild(
   List(
@@ -38,5 +38,5 @@ libraryDependencies ++= Seq(
 
 commands ++= Seq(ciBuild, devBuild)
 
-coverageMinimum := 100
+coverageMinimumStmtTotal := 100
 coverageFailOnMinimum := true
