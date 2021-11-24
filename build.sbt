@@ -1,4 +1,5 @@
 import CiCommands.{ ciBuild, devBuild }
+import xerial.sbt.Sonatype.autoImport.sonatypeCredentialHost
 
 scalaVersion := "2.13.6"
 crossScalaVersions := Seq("2.12.10", "2.13.6")
@@ -15,7 +16,10 @@ inThisBuild(
         email = "vangogiel@hotmail.co.uk",
         url = url("http://vangogiel.io")
       )
-    )
+    ),
+    sonatypeCredentialHost := "s01.oss.sonatype.org",
+    sonatypeRepository := "https://s01.oss.sonatype.org/service/local",
+    sonatypeProfileName := "io.vangogiel",
   )
 )
 
